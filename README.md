@@ -10,6 +10,7 @@ Both [Claude Code](https://claude.com/claude-code) and [opencode](https://openco
 
 ```
 workflow-template/
+├── setup.sh                        installer — copies the right files per agent into a new project
 ├── CLAUDE.md                       project memory, shared by Claude Code and opencode
 ├── opencode.json                   opencode config — instructions + permission defaults
 ├── .claude/
@@ -44,12 +45,18 @@ workflow-template/
 
 ## How to use it for a new project
 
-1. Copy the contents of this directory into your new project root:
+1. Run `setup.sh` from this template directory, pointing it at your new project root and choosing which agent you use:
    ```bash
-   cp -r workflow-template/. my-new-project/
+   ./setup.sh ~/work/my-new-project --claude        # Claude Code only
+   ./setup.sh ~/work/my-new-project --opencode      # opencode only
+   ./setup.sh ~/work/my-new-project --both          # install both
    ```
-2. Edit `CLAUDE.md`: replace `{{PROJECT_NAME}}` and fill in the **About the Project** section. Keep the Plan Review Workflow and Feature-Driven Development Workflow as-is unless you have a reason to change them.
-3. Create an empty `ARCHITECTURE.md` at the project root. It will be filled out as the project takes shape — the skills look for it and gracefully handle its absence.
+   The script copies only what the chosen agent needs plus the shared files (`CLAUDE.md`, `docs/`, `features/`). It skips template-repo cruft — `.git`, `LICENSE`, `README.md`, and `setup.sh` itself — as well as the other agent's files (`.claude/` for opencode, `.opencode/`+`opencode.json` for Claude Code).
+
+   Pass `--name "My App"` to fill in `{{PROJECT_NAME}}` non-interactively, or omit the agent/name flags to be prompted. The script also creates an empty `ARCHITECTURE.md`. Run `./setup.sh --help` for all options.
+
+2. Edit `CLAUDE.md`: fill in the **About the Project** section (and `{{PROJECT_NAME}}` if you didn't pass `--name`). Keep the Plan Review Workflow and Feature-Driven Development Workflow as-is unless you have a reason to change them.
+3. Fill out `ARCHITECTURE.md` as the project takes shape — the skills look for it and gracefully handle its absence.
 4. (Optional) Create `docs/CorporateDesign.md` if the project has any frontend — the `frontend-architecture` skill expects this document for visual / UX constraints.
 5. Run `/requirements <your-project-idea>` inside Claude Code or opencode. The command detects that the PRD is still empty and switches into **Init Mode**, asks you discovery questions, fills out the PRD, and creates the first batch of feature specs. The same four slash commands (`/requirements`, `/technical-design`, `/frontend-architecture`, `/write-tests`) are available in both tools.
 6. For each feature, run:
